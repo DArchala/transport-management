@@ -4,10 +4,12 @@ import com.mxkoo.transport_management.dto.driver.GetDriverResponse;
 import com.mxkoo.transport_management.dto.driver.SetDriverCoordinatesResponse;
 import com.mxkoo.transport_management.dto.driver.UpdateDriverResponse;
 import com.mxkoo.transport_management.entity.Driver;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DriverMapper {
 
-    public static SetDriverCoordinatesResponse mapToSetDriverCoordinatesResponse(Driver driver) {
+    public SetDriverCoordinatesResponse toSetDriverCoordinatesResponse(Driver driver) {
         return new SetDriverCoordinatesResponse(driver.getId(),
                                                 driver.getName(),
                                                 driver.getLastName(),
@@ -19,7 +21,7 @@ public class DriverMapper {
                                                 driver.getDaysOffLeft());
     }
 
-    public static UpdateDriverResponse mapToUpdateDriverResponse(Driver driver) {
+    public UpdateDriverResponse toUpdateDriverResponse(Driver driver) {
         return new UpdateDriverResponse(driver.getId(),
                                         driver.getName(),
                                         driver.getLastName(),
@@ -31,7 +33,7 @@ public class DriverMapper {
                                         driver.getDaysOffLeft());
     }
 
-    public static GetDriverResponse mapToGetDriverResponse(Driver driver) {
+    public GetDriverResponse toGetDriverResponse(Driver driver) {
         return new GetDriverResponse(driver.getId(),
                                      driver.getName(),
                                      driver.getLastName(),

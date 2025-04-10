@@ -3,11 +3,16 @@ package com.mxkoo.transport_management.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mxkoo.transport_management.constant.DriverStatus;
+import com.mxkoo.transport_management.dto.coordinates.CoordinatesDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +50,63 @@ public class Driver {
     @Enumerated(EnumType.STRING)
     private DriverStatus driverStatus;
 
-    private int daysOffLeft = 25;
+    private int daysOffLeft;
 
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Leave> leaves;
+
+    public static Driver create(String name,
+                                String lastName,
+                                CoordinatesDto coordinatesDto,
+                                String email,
+                                Long contactNumber) {
+        return new Driver(null,
+                          name,
+                          lastName,
+                          Coordinates.from(coordinatesDto),
+                          email,
+                          contactNumber,
+                          null,
+                          DriverStatus.PENDING,
+                          25,
+                          null);
+    }
+
+    public boolean isNotOnRoad(LocalDate arrivalDate, LocalDate departureDate) {
+        return roads.stream()
+                    .noneMatch(eachRoad ->
+                                       (eachRoad.getArrivalDate()
+                                                .isBefore(arrivalDate) && eachRoad.getDepartureDate()
+                                                                                  .isAfter(arrivalDate)) ||
+                                       (eachRoad.getArrivalDate()
+                                                .isBefore(departureDate) && eachRoad.getDepartureDate()
+                                                                                    .isAfter(departureDate)) ||
+                                       (eachRoad.getArrivalDate()
+                                                .equals(arrivalDate) || eachRoad.getDepartureDate()
+                                                                                .equals(departureDate))
+                              );
+    }
+
+    public void update(String name, String lastName, String email, Long contactNumber, DriverStatus driverStatus) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (lastName != null) {
+            this.lastName = lastName;
+        }
+        if (email != null) {
+            this.email = email;
+        }
+        if (contactNumber != null) {
+            this.contactNumber = contactNumber;
+        }
+        if (driverStatus != null) {
+            this.driverStatus = driverStatus;
+        }
+    }
+
+    public void applyNewCoordinates(Coordinates coordinates) {
+        this.coordinates = coordinates;
+    }
 }

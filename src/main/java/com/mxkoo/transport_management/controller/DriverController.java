@@ -23,8 +23,8 @@ public class DriverController {
     }
 
     @GetMapping("/{id}")
-    public GetDriverResponse getDriverById(@PathVariable Long id) throws Exception {
-        return driverService.getDriverById(id);
+    public GetDriverResponse findById(@PathVariable Long id) {
+        return driverService.findById(id);
     }
 
     @GetMapping("/all")

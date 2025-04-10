@@ -7,6 +7,7 @@ import com.mxkoo.transport_management.dto.driver.CreateDriverRequest;
 import com.mxkoo.transport_management.dto.driver.UpdateDriverRequest;
 import com.mxkoo.transport_management.dto.driver.UpdateDriverResponse;
 import com.mxkoo.transport_management.entity.Driver;
+import com.mxkoo.transport_management.mapper.DriverMapper;
 import com.mxkoo.transport_management.repository.DriverRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,22 +24,20 @@ import static org.mockito.Mockito.*;
 class DriverServiceTest {
 
     private DriverRepository driverRepository;
-
-    private DriverStatusService driverStatusService;
-
     private DriverService driverService;
+    private DriverMapper driverMapper;
 
     @BeforeEach
     void prepare(){
         driverRepository = mock(DriverRepository.class);
-        driverStatusService = mock(DriverStatusService.class);
-        driverService = new DriverService(driverRepository, driverStatusService);
+        driverMapper = mock(DriverMapper.class);
+        driverService = new DriverService(driverRepository, driverMapper);
     }
 
     @Test
     void createDriver() {
         // Given
-        CreateDriverRequest createDriverRequest = new CreateDriverRequest(1L, "Leo", "Messi", new CoordinatesDto(50, 50),
+        CreateDriverRequest createDriverRequest = new CreateDriverRequest("Leo", "Messi", new CoordinatesDto(50, 50),
                                                       "messi@mail.com", 12345663L,
                                                       null, 5);
 
@@ -93,7 +92,7 @@ class DriverServiceTest {
 
         //when
         when(driverRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(Exception.class, () -> driverService.getDriverById(id));
+        assertThrows(Exception.class, () -> driverService.findById(id));
         //then
         verify(driverRepository).findById(id);
     }

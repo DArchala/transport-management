@@ -5,5 +5,6 @@ public enum DriverStatus {
     ON_THE_WAY,
     ON_VACATION,
     SICK_LEAVE,
-    IN_HOME
+    IN_HOME,
+    PENDING
 }

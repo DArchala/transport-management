@@ -20,32 +20,27 @@ public class DriverMapper {
     }
 
     public static UpdateDriverResponse mapToUpdateDriverResponse(Driver driver) {
-        er
-        return UpdateDriverResponse.builder()
-                                   .id(driver.getId())
-                                   .name(driver.getName())
-                                   .lastName(driver.getLastName())
-                                   .coordinates(driver.getCoordinates()
-                                                      .toDto())
-                                   .email(driver.getEmail())
-                                   .contactNumber(driver.getContactNumber())
-                                   .driverStatus(driver.getDriverStatus())
-                                   .daysOffLeft(driver.getDaysOffLeft())
-                                   .build();
+        return new UpdateDriverResponse(driver.getId(),
+                                        driver.getName(),
+                                        driver.getLastName(),
+                                        driver.getCoordinates()
+                                              .toDto(),
+                                        driver.getEmail(),
+                                        driver.getContactNumber(),
+                                        driver.getDriverStatus(),
+                                        driver.getDaysOffLeft());
     }
 
     public static GetDriverResponse mapToGetDriverResponse(Driver driver) {
-        return GetDriverResponse.builder()
-                                .id(driver.getId())
-                                .name(driver.getName())
-                                .lastName(driver.getLastName())
-                                .coordinates(driver.getCoordinates()
-                                                   .toDto())
-                                .email(driver.getEmail())
-                                .contactNumber(driver.getContactNumber())
-                                .driverStatus(driver.getDriverStatus())
-                                .daysOffLeft(driver.getDaysOffLeft())
-                                .build();
+        return new GetDriverResponse(driver.getId(),
+                                     driver.getName(),
+                                     driver.getLastName(),
+                                     driver.getCoordinates()
+                                           .toDto(),
+                                     driver.getEmail(),
+                                     driver.getContactNumber(),
+                                     driver.getDriverStatus(),
+                                     driver.getDaysOffLeft());
     }
 
 }

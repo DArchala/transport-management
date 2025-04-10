@@ -1,11 +1,9 @@
 package com.mxkoo.transport_management.dto.road;
 
 import com.mxkoo.transport_management.constant.RoadStatus;
-import lombok.Builder;
 
 import java.time.LocalDate;
 
-@Builder
 public record UpdateRoadResponse(Long id,
                                  String from,
                                  String[] via,

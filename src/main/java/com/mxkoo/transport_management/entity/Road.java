@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Road {
@@ -24,7 +23,6 @@ public class Road {
     @NotBlank
     @Column(name = "\"from\"")
     private String from;
-
 
     @Column(name = "\"via\"")
     private String[] via;

@@ -8,37 +8,32 @@ import com.mxkoo.transport_management.entity.Truck;
 public class TruckMapper {
 
     public static GetTruckResponse mapToGetTruckResponse(Truck truck) {
-        return GetTruckResponse.builder()
-                               .id(truck.getId())
-                               .licensePlate(truck.getLicensePlate())
-                               .capacity(truck.getCapacity())
-                               .coordinates(truck.getCoordinates().toDto())
-                               .inspectionDate(truck.getInspectionDate())
-                               .truckStatus(truck.getTruckStatus())
-                               .build();
-
+        return new GetTruckResponse(truck.getId(),
+                                    truck.getLicensePlate(),
+                                    truck.getCapacity(),
+                                    truck.getCoordinates()
+                                         .toDto(),
+                                    truck.getInspectionDate(),
+                                    truck.getTruckStatus());
     }
 
     public static UpdateTruckResponse mapToUpdateTruckResponse(Truck truck) {
-        return UpdateTruckResponse.builder()
-                                  .id(truck.getId())
-                                  .licensePlate(truck.getLicensePlate())
-                                  .capacity(truck.getCapacity())
-                                  .coordinates(truck.getCoordinates().toDto())
-                                  .inspectionDate(truck.getInspectionDate())
-                                  .truckStatus(truck.getTruckStatus())
-                                  .build();
+        return new UpdateTruckResponse(truck.getId(),
+                                       truck.getLicensePlate(),
+                                       truck.getCapacity(),
+                                       truck.getCoordinates()
+                                            .toDto(),
+                                       truck.getInspectionDate(),
+                                       truck.getTruckStatus());
     }
 
     public static SetTruckCoordinatesResponse mapToSetTruckCoordinatesResponse(Truck truck) {
-        return SetTruckCoordinatesResponse.builder()
-                                          .id(truck.getId())
-                                          .licensePlate(truck.getLicensePlate())
-                                          .capacity(truck.getCapacity())
-                                          .coordinates(truck.getCoordinates().toDto())
-                                          .inspectionDate(truck.getInspectionDate())
-                                          .truckStatus(truck.getTruckStatus())
-                                          .build();
-
+        return new SetTruckCoordinatesResponse(truck.getId(),
+                                               truck.getLicensePlate(),
+                                               truck.getCapacity(),
+                                               truck.getCoordinates()
+                                                    .toDto(),
+                                               truck.getInspectionDate(),
+                                               truck.getTruckStatus());
     }
 }

@@ -7,18 +7,14 @@ import com.mxkoo.transport_management.entity.Leave;
 public class LeaveMapper {
 
     public static GetLeaveResponse mapToGetLeaveResponse(Leave leave) {
-        return GetLeaveResponse.builder()
-                               .id(leave.getId())
-                               .start(leave.getStart())
-                               .end(leave.getEnd())
-                               .build();
+        return new GetLeaveResponse(leave.getId(),
+                                    leave.getStart(),
+                                    leave.getEnd());
     }
 
     public static UpdateLeaveResponse mapToUpdateLeaveResponse(Leave leave) {
-        return UpdateLeaveResponse.builder()
-                                  .id(leave.getId())
-                                  .start(leave.getStart())
-                                  .end(leave.getEnd())
-                                  .build();
+        return new UpdateLeaveResponse(leave.getId(),
+                                       leave.getStart(),
+                                       leave.getEnd());
     }
 }

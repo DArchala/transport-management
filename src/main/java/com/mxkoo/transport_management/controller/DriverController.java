@@ -34,7 +34,7 @@ public class DriverController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteDriver(@PathVariable Long id) throws Exception {
+    public void deleteDriver(@PathVariable Long id) {
         driverService.deleteById(id);
     }
 
@@ -45,7 +45,7 @@ public class DriverController {
     }
 
     @PatchMapping("/{id}")
-    public UpdateDriverResponse updateDriver(@PathVariable Long id, @Valid @RequestBody UpdateDriverRequest request) throws Exception {
+    public UpdateDriverResponse updateDriver(@PathVariable Long id, @Valid @RequestBody UpdateDriverRequest request) {
         return driverService.updateDriver(id, request);
     }
 

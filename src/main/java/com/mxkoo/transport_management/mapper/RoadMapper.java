@@ -8,44 +8,39 @@ import com.mxkoo.transport_management.entity.Road;
 public class RoadMapper {
 
     public static GetRoadResponse mapToGetRoadResponse(Road road) {
-        return GetRoadResponse.builder()
-                              .id(road.getId())
-                              .from(road.getFrom())
-                              .via(road.getVia())
-                              .to(road.getTo())
-                              .departureDate(road.getDepartureDate())
-                              .arrivalDate(road.getArrivalDate())
-                              .distance(road.getDistance())
-                              .price(road.getPrice())
-                              .roadStatus(road.getRoadStatus())
-                              .build();
+        return new GetRoadResponse(road.getId(),
+                                   road.getFrom(),
+                                   road.getVia(),
+                                   road.getTo(),
+                                   road.getDepartureDate(),
+                                   road.getArrivalDate(),
+                                   road.getDistance(),
+                                   road.getPrice(),
+                                   road.getRoadStatus()
+        );
     }
 
     public static UpdateRoadResponse mapToUpdateRoadResponse(Road road) {
-        return UpdateRoadResponse.builder()
-                                 .id(road.getId())
-                                 .from(road.getFrom())
-                                 .via(road.getVia())
-                                 .to(road.getTo())
-                                 .departureDate(road.getDepartureDate())
-                                 .arrivalDate(road.getArrivalDate())
-                                 .distance(road.getDistance())
-                                 .price(road.getPrice())
-                                 .roadStatus(road.getRoadStatus())
-                                 .build();
+        return new UpdateRoadResponse(road.getId(),
+                                      road.getFrom(),
+                                      road.getVia(),
+                                      road.getTo(),
+                                      road.getDepartureDate(),
+                                      road.getArrivalDate(),
+                                      road.getDistance(),
+                                      road.getPrice(),
+                                      road.getRoadStatus());
     }
 
     public static CreateRoadResponse mapToCreateRoadResponse(Road road) {
-        return CreateRoadResponse.builder()
-                                 .id(road.getId())
-                                 .from(road.getFrom())
-                                 .via(road.getVia())
-                                 .to(road.getTo())
-                                 .departureDate(road.getDepartureDate())
-                                 .arrivalDate(road.getArrivalDate())
-                                 .distance(road.getDistance())
-                                 .price(road.getPrice())
-                                 .roadStatus(road.getRoadStatus())
-                                 .build();
+        return new CreateRoadResponse(road.getId(),
+                                      road.getFrom(),
+                                      road.getVia(),
+                                      road.getTo(),
+                                      road.getDepartureDate(),
+                                      road.getArrivalDate(),
+                                      road.getDistance(),
+                                      road.getPrice(),
+                                      road.getRoadStatus());
     }
 }

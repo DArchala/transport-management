@@ -1,6 +1,6 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.LocationRoadDTO;
+import com.mxkoo.transport_management.dto.road.GetRoadLocationResponse;
 import com.mxkoo.transport_management.repository.RoadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,10 +14,10 @@ public class LocationRoadService {
 
     private final RoadRepository roadRepository;
 
-    public List<LocationRoadDTO> getRoadLocation() {
+    public List<GetRoadLocationResponse> getRoadLocation() {
         return roadRepository.findAll()
                              .stream()
-                             .map(road -> new LocationRoadDTO(
+                             .map(road -> new GetRoadLocationResponse(
                                      road.getId(),
                                      road.getFrom(),
                                      road.getVia(),

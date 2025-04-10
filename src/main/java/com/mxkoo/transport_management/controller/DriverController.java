@@ -1,11 +1,10 @@
 package com.mxkoo.transport_management.controller;
 
-import com.mxkoo.transport_management.dto.Coordinates;
-import com.mxkoo.transport_management.dto.DriverDTO;
+import com.mxkoo.transport_management.dto.driver.*;
 import com.mxkoo.transport_management.service.DriverService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,17 +17,18 @@ public class DriverController {
     private final DriverService driverService;
 
     @PostMapping("/add")
-    public DriverDTO createDriver(@RequestBody @Validated DriverDTO driverDTO) {
-        return driverService.createDriver(driverDTO);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createDriver(@Valid @RequestBody CreateDriverRequest createDriverRequest) {
+        driverService.createDriver(createDriverRequest);
     }
 
     @GetMapping("/{id}")
-    public DriverDTO getDriverById(@PathVariable Long id) throws Exception {
+    public GetDriverResponse getDriverById(@PathVariable Long id) throws Exception {
         return driverService.getDriverById(id);
     }
 
     @GetMapping("/all")
-    public List<DriverDTO> getAllDrivers() {
+    public List<GetDriverResponse> getAllDrivers() {
         return driverService.getAllDrivers();
     }
 
@@ -45,13 +45,13 @@ public class DriverController {
     }
 
     @PatchMapping("/{id}")
-    public DriverDTO updateDriver(@PathVariable Long id, @RequestBody DriverDTO toUpdate) throws Exception {
-        return driverService.updateDriver(id, toUpdate);
+    public UpdateDriverResponse updateDriver(@PathVariable Long id, @Valid @RequestBody UpdateDriverRequest request) throws Exception {
+        return driverService.updateDriver(id, request);
     }
 
-    @PatchMapping("/coordinates" + "/{driverId}")
-    public DriverDTO setCoordinatesForDriver(@PathVariable Long driverId, @RequestBody Coordinates coordinates) throws Exception {
-        return driverService.setCoordinatesForDriver(driverId, coordinates);
+    @PatchMapping("/coordinates/{driverId}")
+    public SetDriverCoordinatesResponse setCoordinatesForDriver(@PathVariable Long driverId, @Valid @RequestBody SetDriverCoordinatesRequest request) throws Exception {
+        return driverService.setCoordinatesForDriver(driverId, request);
     }
 
 

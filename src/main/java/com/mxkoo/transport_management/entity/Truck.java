@@ -1,7 +1,6 @@
 package com.mxkoo.transport_management.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mxkoo.transport_management.dto.Coordinates;
 import com.mxkoo.transport_management.constant.TruckStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

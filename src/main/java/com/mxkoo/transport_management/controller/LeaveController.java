@@ -1,11 +1,13 @@
 package com.mxkoo.transport_management.controller;
 
-import com.mxkoo.transport_management.dto.LeaveDTO;
+import com.mxkoo.transport_management.dto.leave.CreateLeaveRequest;
+import com.mxkoo.transport_management.dto.leave.GetLeaveResponse;
 import com.mxkoo.transport_management.service.LeaveService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -16,17 +18,18 @@ public class LeaveController {
     private final LeaveService leaveService;
 
     @PostMapping("/leave/{driverId}")
-    public void createLeaveRequest(@PathVariable Long driverId, @RequestParam LocalDate start, @RequestParam LocalDate end) throws Exception {
-        leaveService.createLeaveRequest(driverId, start, end);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createLeave(@PathVariable Long driverId, @Valid CreateLeaveRequest createLeaveRequest) throws Exception {
+        leaveService.createLeave(driverId, createLeaveRequest);
     }
 
     @GetMapping("/leave/all")
-    public List<LeaveDTO> getAllLeaves() {
+    public List<GetLeaveResponse> getAllLeaves() {
         return leaveService.getAllLeaves();
     }
 
     @GetMapping("/leave/{id}")
-    public LeaveDTO getLeaveById(@PathVariable Long id) throws Exception {
+    public GetLeaveResponse getLeaveById(@PathVariable Long id) throws Exception {
         return leaveService.getLeaveById(id);
     }
 

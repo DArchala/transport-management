@@ -1,6 +1,6 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.LocationTruckDTO;
+import com.mxkoo.transport_management.dto.truck.GetTruckLocationResponse;
 import com.mxkoo.transport_management.repository.TruckRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,12 +14,12 @@ public class LocationTruckService {
 
     private final TruckRepository truckRepository;
 
-    public List<LocationTruckDTO> getTruckLocations() {
+    public List<GetTruckLocationResponse> getTruckLocations() {
         return truckRepository.findAll()
                               .stream()
-                              .map(truck -> new LocationTruckDTO(
+                              .map(truck -> new GetTruckLocationResponse(
                                       truck.getId(),
-                                      truck.getCoordinates(),
+                                      truck.getCoordinates().toDto(),
                                       truck.getLicensePlate(),
                                       truck.getTruckStatus()
                               ))

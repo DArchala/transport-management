@@ -1,21 +1,23 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.Coordinates;
-import com.mxkoo.transport_management.dto.RoadDTO;
-import com.mxkoo.transport_management.constant.RoadStatus;
 import com.mxkoo.transport_management.constant.TruckStatus;
-import com.mxkoo.transport_management.dto.TruckDTO;
+import com.mxkoo.transport_management.dto.coordinates.CoordinatesDto;
+import com.mxkoo.transport_management.entity.Coordinates;
+import com.mxkoo.transport_management.dto.truck.CreateTruckRequest;
+import com.mxkoo.transport_management.dto.truck.UpdateTruckRequest;
+import com.mxkoo.transport_management.dto.truck.UpdateTruckResponse;
 import com.mxkoo.transport_management.entity.Truck;
-import com.mxkoo.transport_management.mapper.TruckMapper;
 import com.mxkoo.transport_management.repository.TruckRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class TruckServiceTest {
@@ -24,60 +26,52 @@ class TruckServiceTest {
     private TruckStatusService truckStatusService;
 
     @BeforeEach
-    void prepare(){
+    void prepare() {
         truckRepository = mock(TruckRepository.class);
         truckStatusService = mock(TruckStatusService.class);
         truckService = new TruckService(truckRepository, truckStatusService);
     }
 
     @Test
-    void createTruck(){
+    void createTruck() {
         //given
-        TruckDTO truckDTO = new TruckDTO(1L, "XD 1234A", 55, new Coordinates(50, 50), LocalDate.of(2025, 12, 12), new ArrayList<>(), TruckStatus.WAITING_FOR_ROAD);
+        CreateTruckRequest createTruckRequest = new CreateTruckRequest(1L, "XD 1234A", 55, new CoordinatesDto(50, 50), LocalDate.of(2025, 12, 12), TruckStatus.WAITING_FOR_ROAD);
 
         Truck created = new Truck();
         created.setId(1L);
         created.setLicensePlate("XD 1234A");
         created.setCapacity(55);
-        created.setCoordinates(new Coordinates(50,50));
-        created.setInspectionDate(LocalDate.of(2025,12,12));
+        created.setCoordinates(new Coordinates(50, 50));
+        created.setInspectionDate(LocalDate.of(2025, 12, 12));
         created.setRoads(new ArrayList<>());
         created.setTruckStatus(TruckStatus.WAITING_FOR_ROAD);
         //when
         when(truckRepository.save(any(Truck.class))).thenReturn(created);
 
-        TruckDTO createdDTO = truckService.createTruck(truckDTO);
+        ;
 
         //then
-        assertAll("Mapping",
-                () -> assertEquals(truckDTO.id(), createdDTO.id()),
-                () -> assertEquals(truckDTO.licensePlate(), createdDTO.licensePlate()),
-                () -> assertEquals(truckDTO.capacity(), createdDTO.capacity()),
-                () -> assertEquals(truckDTO.coordinates().getX(), createdDTO.coordinates().getX()),
-                () -> assertEquals(truckDTO.coordinates().getY(), createdDTO.coordinates().getY()),
-                () -> assertEquals(truckDTO.inspectionDate(), createdDTO.inspectionDate()),
-                () -> assertEquals(truckDTO.roads(), createdDTO.roads()),
-                () -> assertEquals(truckDTO.truckStatus(), createdDTO.truckStatus())
-        );
-
+        assertDoesNotThrow(() -> truckService.createTruck(createTruckRequest));
         verify(truckRepository, times(1)).save(any(Truck.class));
     }
 
     @Test
-    void updateTruck() throws Exception{
+    void updateTruck() {
         //given
-        Truck toUpdate = new Truck(1L, "XD 1234A", 55, new Coordinates(50,50), LocalDate.of(2025,12,12), new ArrayList<>(), TruckStatus.WAITING_FOR_ROAD);
+        Truck truck = new Truck(1L, "XD 1234A", 55, new Coordinates(50, 50), LocalDate.of(2025, 12, 12), new ArrayList<>(), TruckStatus.WAITING_FOR_ROAD);
+        UpdateTruckRequest updateTruckRequest = new UpdateTruckRequest(1L, "XD 1234A", 55, new CoordinatesDto(50, 50), LocalDate.of(2025, 12, 12), TruckStatus.WAITING_FOR_ROAD);
 
-        when(truckRepository.findById(eq(1L))).thenReturn(Optional.of(toUpdate));
+        when(truckRepository.findById(eq(1L))).thenReturn(Optional.of(truck));
         when(truckRepository.existsById(1L)).thenReturn(true);
         when(truckRepository.save(any(Truck.class))).thenAnswer(i -> i.getArgument(0));
         //when
-        TruckDTO updated = truckService.updateTruck(1L, TruckMapper.mapToDTOWithRoad(toUpdate));
+        UpdateTruckResponse updateTruckResponse = truckService.updateTruck(1L, updateTruckRequest);
         //then
-        assertNotNull(toUpdate);
-        assertNotNull(updated);
-        assertEquals(toUpdate.getId(), updated.id());
-        assertTrue(truckRepository.findById(1L).isPresent());
+        assertNotNull(truck);
+        assertNotNull(updateTruckResponse);
+        assertEquals(truck.getId(), updateTruckResponse.id());
+        assertTrue(truckRepository.findById(1L)
+                                  .isPresent());
 
         verify(truckRepository, atLeastOnce()).findById(1L);
         verify(truckRepository).save(any(Truck.class));
@@ -85,7 +79,7 @@ class TruckServiceTest {
     }
 
     @Test
-    void getTruck_WhenDoesNotExist(){
+    void getTruck_WhenDoesNotExist() {
         //given
         Long id = 1L;
 
@@ -103,21 +97,16 @@ class TruckServiceTest {
         truck.setCapacity(55);
         truck.setTruckStatus(TruckStatus.ON_THE_WAY);
         truck.setRoads(new ArrayList<>());
-        RoadDTO roadDTO = new RoadDTO(1L, "Warszawa", new String[]{"Bydgoszcz"}, "Gdańsk",
-                LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 20),
-                400.88, 2800.98, null, null, RoadStatus.IN_FUTURE);
-
 
         when(truckRepository.findByCapacityAndTruckStatus(55, TruckStatus.WAITING_FOR_ROAD))
                 .thenReturn(Collections.emptyList());
 
         // when & then
         NoSuchElementException exception = assertThrows(NoSuchElementException.class,
-                () -> truckService.getAvailableTruck(55, roadDTO));
+                                                        () -> truckService.getAvailableTruck(55, LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 20)));
 
         assertEquals("Nie znaleziono pojazdu", exception.getMessage());
     }
-
 
 
 }

@@ -1,13 +1,13 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.Coordinates;
 import com.mxkoo.transport_management.constant.DriverStatus;
-import com.mxkoo.transport_management.dto.DriverDTO;
-import com.mxkoo.transport_management.mapper.DriverMapper;
-import com.mxkoo.transport_management.repository.DriverRepository;
-import com.mxkoo.transport_management.dto.RoadDTO;
-import com.mxkoo.transport_management.constant.RoadStatus;
+import com.mxkoo.transport_management.dto.coordinates.CoordinatesDto;
+import com.mxkoo.transport_management.entity.Coordinates;
+import com.mxkoo.transport_management.dto.driver.CreateDriverRequest;
+import com.mxkoo.transport_management.dto.driver.UpdateDriverRequest;
+import com.mxkoo.transport_management.dto.driver.UpdateDriverResponse;
 import com.mxkoo.transport_management.entity.Driver;
+import com.mxkoo.transport_management.repository.DriverRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class DriverServiceTest {
@@ -39,9 +38,9 @@ class DriverServiceTest {
     @Test
     void createDriver() {
         // Given
-        DriverDTO driverDTO = new DriverDTO(1L, "Leo", "Messi", new Coordinates(50, 50),
-                                            "messi@mail.com", 12345663L, new ArrayList<>(),
-                                            null, 5, null);
+        CreateDriverRequest createDriverRequest = new CreateDriverRequest(1L, "Leo", "Messi", new CoordinatesDto(50, 50),
+                                                      "messi@mail.com", 12345663L,
+                                                      null, 5);
 
         Driver created = new Driver();
         created.setId(1L);
@@ -57,42 +56,31 @@ class DriverServiceTest {
         when(driverRepository.save(any(Driver.class))).thenReturn(created);
 
         // When
-        DriverDTO createdDTO = driverService.createDriver(driverDTO);
+        driverService.createDriver(createDriverRequest);
 
         // Then
-        assertAll("Mapping",
-                () -> assertEquals(driverDTO.id(), createdDTO.id()),
-                () -> assertEquals(driverDTO.name(), createdDTO.name()),
-                () -> assertEquals(driverDTO.lastName(), createdDTO.lastName()),
-                () -> assertEquals(driverDTO.coordinates().getX(), createdDTO.coordinates().getX()),
-                () -> assertEquals(driverDTO.coordinates().getY(), createdDTO.coordinates().getY()),
-                () -> assertEquals(driverDTO.email(), createdDTO.email()),
-                () -> assertEquals(driverDTO.contactNumber(), createdDTO.contactNumber()),
-                () -> assertEquals(driverDTO.roads(), createdDTO.roads()),
-                () -> assertEquals(driverDTO.daysOffLeft(), createdDTO.daysOffLeft()),
-                () -> assertEquals(driverDTO.leaves(), createdDTO.leaves())
-        );
-
+        assertDoesNotThrow(() -> driverRepository.findById(1L));
         verify(driverRepository, times(1)).save(any(Driver.class));
     }
 
     @Test
     void updateDriver() throws Exception {
-        Driver toUpdate = new Driver(1L, "Leo", "Messi", new Coordinates(50, 50),
-                "messi@mail.com", 12345663L, new ArrayList<>(),
-                null, 5, null);
+        UpdateDriverRequest updateDriverRequest = new UpdateDriverRequest(1L, "Leo", "Messi", new CoordinatesDto(50, 50),
+                                                             "messi@mail.com", 12345663L, null, 25);
+        Driver driver = new Driver(1L, "Leo", "Messi", new Coordinates(50, 50),
+                                   "messi@mail.com", 12345663L, null, null, 25, null);
 
-        when(driverRepository.findById(eq(1L))).thenReturn(Optional.of(toUpdate));
-        when(driverRepository.existsById(1L)).thenReturn(true);
+
+        when(driverRepository.findById(eq(1L))).thenReturn(Optional.of(driver));
         when(driverRepository.save(any(Driver.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        DriverDTO updated = driverService.updateDriver(1L, DriverMapper.mapToDTOWithRoad(toUpdate));
+        UpdateDriverResponse updateDriverResponse = driverService.updateDriver(1L, updateDriverRequest);
 
         // Then
-        assertNotNull(toUpdate);
-        assertNotNull(updated);
-        assertEquals(toUpdate.getId(), updated.id());
+        assertNotNull(updateDriverRequest);
+        assertNotNull(updateDriverResponse);
+        assertEquals(updateDriverRequest.id(), updateDriverResponse.id());
         assertTrue(driverRepository.findById(1L).isPresent());
 
         verify(driverRepository, atLeastOnce()).findById(1L);
@@ -116,16 +104,13 @@ class DriverServiceTest {
         Driver driver = new Driver();
         driver.setDriverStatus(DriverStatus.ON_THE_WAY);
         driver.setRoads(new ArrayList<>());
-        RoadDTO roadDTO = new RoadDTO(1L, "Warszawa", new String[]{"Bydgoszcz"}, "Gdańsk",
-                LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 20),
-                400.88, 2800.98, null, null, RoadStatus.IN_FUTURE);
 
         when(driverRepository.findDriverByDriverStatus(DriverStatus.WAITING_FOR_ROAD))
                 .thenReturn(Collections.emptyList());
 
         //when & then
         NoSuchElementException exception = assertThrows(NoSuchElementException.class,
-                () -> driverService.getAvailableDriverNotOnRoad(roadDTO));
+                () -> driverService.getAvailableDriverNotOnRoad(LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 20)));
         assertEquals("Nie znaleziono kierowcy", exception.getMessage());
 
     }

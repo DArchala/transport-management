@@ -1,11 +1,10 @@
 package com.mxkoo.transport_management.controller;
 
-import com.mxkoo.transport_management.dto.Coordinates;
-import com.mxkoo.transport_management.dto.TruckDTO;
+import com.mxkoo.transport_management.dto.truck.*;
 import com.mxkoo.transport_management.service.TruckService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,26 +13,28 @@ import java.util.List;
 @RequestMapping("/trucks")
 @RequiredArgsConstructor
 public class TruckController {
+
     private final TruckService truckService;
 
-    @PostMapping()
-    public TruckDTO createTruck(@RequestBody @Validated TruckDTO truckDTO) {
-        return truckService.createTruck(truckDTO);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createTruck(@Valid @RequestBody CreateTruckRequest createTruckRequest) {
+        truckService.createTruck(createTruckRequest);
     }
 
     @GetMapping("/{id}")
-    public TruckDTO getTruck(@PathVariable Long id) throws Exception {
+    public GetTruckResponse getTruck(@PathVariable Long id) {
         return truckService.getTruckById(id);
     }
 
     @GetMapping("/all")
-    public List<TruckDTO> getAllTrucks() {
+    public List<GetTruckResponse> getAllTrucks() {
         return truckService.getAllTrucks();
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteTruck(@PathVariable Long id) throws Exception {
+    public void deleteTruck(@PathVariable Long id) {
         truckService.deleteById(id);
     }
 
@@ -44,12 +45,12 @@ public class TruckController {
     }
 
     @PatchMapping("/{id}")
-    public TruckDTO updateTruck(@PathVariable Long id, @RequestBody TruckDTO truckDTO) throws Exception {
-        return truckService.updateTruck(id, truckDTO);
+    public UpdateTruckResponse updateTruck(@PathVariable Long id, @Valid @RequestBody UpdateTruckRequest updateTruckRequest) {
+        return truckService.updateTruck(id, updateTruckRequest);
     }
 
     @PatchMapping("/coordinates/{truckId}")
-    public TruckDTO setCoordinatesForTruck(@PathVariable Long truckId, @RequestBody Coordinates coordinates) throws Exception {
-        return truckService.setCoordinatesForTruck(truckId, coordinates);
+    public SetTruckCoordinatesResponse setCoordinatesForTruck(@PathVariable Long truckId, @RequestBody SetTruckCoordinatesRequest setTruckCoordinatesRequest) {
+        return truckService.setCoordinatesForTruck(truckId, setTruckCoordinatesRequest);
     }
 }

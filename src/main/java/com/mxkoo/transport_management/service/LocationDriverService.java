@@ -1,7 +1,7 @@
 package com.mxkoo.transport_management.service;
 
+import com.mxkoo.transport_management.dto.driver.GetDriverLocationResponse;
 import com.mxkoo.transport_management.repository.DriverRepository;
-import com.mxkoo.transport_management.dto.LocationDriverDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +14,17 @@ public class LocationDriverService {
 
     private final DriverRepository driverRepository;
 
-    public List<LocationDriverDTO> getDriverLocations() {
+    public List<GetDriverLocationResponse> getDriverLocations() {
         return driverRepository.findAll()
-                .stream()
-                .map(driver -> new LocationDriverDTO(
-                        driver.getId(),
-                        driver.getCoordinates(),
-                        driver.getName(),
-                        driver.getLastName(),
-                        driver.getContactNumber(),
-                        driver.getDriverStatus()
-                ))
-                .collect(Collectors.toList());
+                               .stream()
+                               .map(driver -> new GetDriverLocationResponse(
+                                       driver.getId(),
+                                       driver.getCoordinates().toDto(),
+                                       driver.getName(),
+                                       driver.getLastName(),
+                                       driver.getContactNumber(),
+                                       driver.getDriverStatus()
+                               ))
+                               .collect(Collectors.toList());
     }
 }

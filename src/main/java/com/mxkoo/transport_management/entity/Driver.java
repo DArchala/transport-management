@@ -2,7 +2,6 @@ package com.mxkoo.transport_management.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.mxkoo.transport_management.dto.Coordinates;
 import com.mxkoo.transport_management.constant.DriverStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;

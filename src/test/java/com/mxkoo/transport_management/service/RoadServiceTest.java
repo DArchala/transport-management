@@ -1,14 +1,14 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.Coordinates;
-import com.mxkoo.transport_management.dto.RoadDTO;
-import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.constant.DriverStatus;
 import com.mxkoo.transport_management.constant.RoadStatus;
+import com.mxkoo.transport_management.constant.TruckStatus;
+import com.mxkoo.transport_management.entity.Coordinates;
+import com.mxkoo.transport_management.dto.road.GetRoadResponse;
+import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.entity.Road;
 import com.mxkoo.transport_management.entity.Truck;
 import com.mxkoo.transport_management.repository.RoadRepository;
-import com.mxkoo.transport_management.constant.TruckStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestTemplate;
@@ -45,11 +45,11 @@ class RoadServiceTest {
 //    void createRoad() {
 //        // given
 //        TruckDTO truckDTO = new TruckDTO(1L, "XD 1234A", 55, null, LocalDate.of(2025,12,12), new ArrayList<>(), TruckStatus.WAITING_FOR_ROAD);
-//        DriverDTO driverDTO = new DriverDTO(1L, "Leo", "Messi", null, "messi@mail.com", 12345663L, new ArrayList<>(), DriverStatus.WAITING_FOR_ROAD, 5, null);
-//        RoadDTO roadDTO = new RoadDTO(1L, "Warszawa", new String[]{"Bydgoszcz"}, "Gdańsk", LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 20), 400.88, 2800.98, truckDTO, driverDTO, RoadStatus.IN_FUTURE);
+//        DriverDTO driverData = new DriverDTO(1L, "Leo", "Messi", null, "messi@mail.com", 12345663L, new ArrayList<>(), DriverStatus.WAITING_FOR_ROAD, 5, null);
+//        RoadDTO roadDTO = new RoadDTO(1L, "Warszawa", new String[]{"Bydgoszcz"}, "Gdańsk", LocalDate.of(2025, 5, 5), LocalDate.of(2025, 5, 20), 400.88, 2800.98, truckDTO, driverData, RoadStatus.IN_FUTURE);
 //
 //        Truck mappedTruck = TruckMapper.mapToEntityWithRoad(truckDTO);
-//        Driver mappedDriver = DriverMapper.mapToEntityWithRoad(driverDTO);
+//        Driver mappedDriver = DriverMapper.mapToEntityWithRoad(driverData);
 //        when(truckService.getAvailableTruck(55, roadDTO)).thenReturn(mappedTruck);
 //        when(driverService.getAvailableDriverNotOnRoad(roadDTO)).thenReturn(mappedDriver);
 //
@@ -89,7 +89,7 @@ class RoadServiceTest {
 //                () -> assertEquals(roadDTO.distance(), createdDTO.distance()),
 //                () -> assertEquals(roadDTO.price(), createdDTO.price()),
 //                () -> assertEquals(roadDTO.truckDTO(), createdDTO.truckDTO()),
-//                () -> assertEquals(roadDTO.driverDTO(), createdDTO.driverDTO()),
+//                () -> assertEquals(roadDTO.driverData(), createdDTO.driverData()),
 //                () -> assertEquals(roadDTO.roadStatus(), createdDTO.roadStatus())
 //        );
 //    }
@@ -113,7 +113,7 @@ class RoadServiceTest {
         roads.add(road2);
         //when
         when(roadRepository.getRoadByTruckId(1L)).thenReturn(roads);
-        List<RoadDTO> result = roadService.getAllTruckRoads(1L);
+        List<GetRoadResponse> result = roadService.getAllTruckRoads(1L);
         //then
         assertNotNull(result);
         assertEquals(roads.size(), result.size());
@@ -145,7 +145,7 @@ class RoadServiceTest {
 
         //when
         when(roadRepository.getRoadByDriverId(1L)).thenReturn(roads);
-        List<RoadDTO> result = roadService.getAllDriverRoads(1L);
+        List<GetRoadResponse> result = roadService.getAllDriverRoads(1L);
         //then
         assertNotNull(result);
         assertEquals(roads.size(), result.size());

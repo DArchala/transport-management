@@ -1,16 +1,16 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.Coordinates;
-import com.mxkoo.transport_management.dto.DriverDTO;
+import com.mxkoo.transport_management.constant.DriverStatus;
+import com.mxkoo.transport_management.entity.Coordinates;
+import com.mxkoo.transport_management.dto.driver.*;
+import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.mapper.DriverMapper;
 import com.mxkoo.transport_management.repository.DriverRepository;
-import com.mxkoo.transport_management.constant.DriverStatus;
-import com.mxkoo.transport_management.dto.RoadDTO;
-import com.mxkoo.transport_management.entity.Driver;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -22,34 +22,31 @@ public class DriverService {
     private final DriverStatusService driverStatusService;
 
     @Transactional
-    public DriverDTO createDriver(DriverDTO driverDTO) {
+    public void createDriver(CreateDriverRequest createDriverRequest) {
         Driver driver = new Driver();
-        driver.setName(driverDTO.name());
-        driver.setLastName(driverDTO.lastName());
-        driver.setEmail(driverDTO.email());
-        driver.setContactNumber(driverDTO.contactNumber());
+        driver.setName(createDriverRequest.name());
+        driver.setLastName(createDriverRequest.lastName());
+        driver.setEmail(createDriverRequest.email());
+        driver.setContactNumber(createDriverRequest.contactNumber());
         driverStatusService.setStatusForDriver(driver);
-        return DriverMapper.mapToDTOWithRoad(repository.save(driver));
+        repository.save(driver);
     }
 
-    @Transactional
-    public DriverDTO getDriverById(Long id) throws Exception {
-        Driver driver = repository.findById(id)
-                                  .orElseThrow(Exception::new);
-        return DriverMapper.mapToDTOWithRoad(driver);
+    public GetDriverResponse getDriverById(Long id) throws Exception {
+        var driver = repository.findById(id)
+                               .orElseThrow(Exception::new);
+        return DriverMapper.mapToGetDriverResponse(driver);
     }
 
-    @Transactional
-    public List<DriverDTO> getAllDrivers() {
+    public List<GetDriverResponse> getAllDrivers() {
         List<Driver> drivers = repository.findAll();
         return drivers.stream()
-                      .map(DriverMapper::mapToDTOWithRoad)
+                      .map(DriverMapper::mapToGetDriverResponse)
                       .toList();
     }
 
     @Transactional
-    public void deleteById(Long id) throws Exception {
-        checkIfExists(id);
+    public void deleteById(Long id) {
         repository.deleteById(id);
     }
 
@@ -60,57 +57,57 @@ public class DriverService {
     }
 
     @Transactional
-    public DriverDTO findDriver(Long id) throws Exception {
-        return DriverMapper.mapToDTOWithRoad(repository.findById(id)
+    public GetDriverResponse findDriver(Long id) throws Exception {
+        return DriverMapper.mapToGetDriverResponse(repository.findById(id)
                                                        .orElseThrow(Exception::new));
     }
 
     @Transactional
-    public DriverDTO updateDriver(Long id, DriverDTO toUpdate) throws Exception {
-        checkIfExists(id);
-        Driver driver = DriverMapper.mapToEntityWithRoad(findDriver(id));
-        if (toUpdate.name() != null) {
-            driver.setName(toUpdate.name());
+    public UpdateDriverResponse updateDriver(Long id, UpdateDriverRequest request) {
+        Driver driver = repository.findById(id)
+                                  .orElseThrow();
+        if (request.name() != null) {
+            driver.setName(request.name());
         }
-        if (toUpdate.lastName() != null) {
-            driver.setLastName(toUpdate.lastName());
+        if (request.lastName() != null) {
+            driver.setLastName(request.lastName());
         }
-        if (toUpdate.email() != null) {
-            driver.setEmail(toUpdate.email());
+        if (request.email() != null) {
+            driver.setEmail(request.email());
         }
-        if (toUpdate.contactNumber() != null) {
-            driver.setContactNumber(toUpdate.contactNumber());
+        if (request.contactNumber() != null) {
+            driver.setContactNumber(request.contactNumber());
         }
-        if (toUpdate.driverStatus() != null) {
-            driver.setDriverStatus(toUpdate.driverStatus());
+        if (request.driverStatus() != null) {
+            driver.setDriverStatus(request.driverStatus());
         }
-        return DriverMapper.mapToDTOWithRoad(repository.save(driver));
+        return DriverMapper.mapToUpdateDriverResponse(repository.save(driver));
     }
 
     @Transactional
-    public DriverDTO setCoordinatesForDriver(Long driverId, Coordinates coordinates) throws Exception {
+    public SetDriverCoordinatesResponse setCoordinatesForDriver(Long driverId, SetDriverCoordinatesRequest coordinates) throws Exception {
         Driver driver = repository.findById(driverId)
                                   .orElseThrow(() -> new Exception("Driver not found with ID: " + driverId));
-        driver.setCoordinates(new Coordinates(coordinates.getX(), coordinates.getY()));
-        return DriverMapper.mapToDTOWithRoad(driver);
+        driver.setCoordinates(new Coordinates(coordinates.x(), coordinates.y()));
+        return DriverMapper.mapToSetDriverCoordinatesResponse(driver);
     }
 
     @Transactional
-    public Driver getAvailableDriverNotOnRoad(RoadDTO road) {
+    public Driver getAvailableDriverNotOnRoad(LocalDate arrivalDate, LocalDate departureDate) {
         return repository.findDriverByDriverStatus(DriverStatus.WAITING_FOR_ROAD)
                          .stream()
                          .filter(driver -> driver.getRoads()
                                                  .stream()
                                                  .noneMatch(eachRoad ->
                                                                     (eachRoad.getArrivalDate()
-                                                                             .isBefore(road.arrivalDate()) && eachRoad.getDepartureDate()
-                                                                                                                      .isAfter(road.arrivalDate())) ||
+                                                                             .isBefore(arrivalDate) && eachRoad.getDepartureDate()
+                                                                                                                      .isAfter(arrivalDate)) ||
                                                                     (eachRoad.getArrivalDate()
-                                                                             .isBefore(road.departureDate()) && eachRoad.getDepartureDate()
-                                                                                                                        .isAfter(road.departureDate())) ||
+                                                                             .isBefore(departureDate) && eachRoad.getDepartureDate()
+                                                                                                                        .isAfter(departureDate)) ||
                                                                     (eachRoad.getArrivalDate()
-                                                                             .equals(road.arrivalDate()) || eachRoad.getDepartureDate()
-                                                                                                                    .equals(road.departureDate()))
+                                                                             .equals(arrivalDate) || eachRoad.getDepartureDate()
+                                                                                                                    .equals(departureDate))
                                                            ))
                          .findFirst()
                          .orElseThrow(() -> new NoSuchElementException("Nie znaleziono kierowcy"));

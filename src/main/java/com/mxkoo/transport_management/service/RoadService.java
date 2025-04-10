@@ -1,15 +1,13 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.RoadDTO;
-import com.mxkoo.transport_management.entity.Driver;
-import com.mxkoo.transport_management.mapper.DriverMapper;
 import com.mxkoo.transport_management.constant.DriverStatus;
+import com.mxkoo.transport_management.constant.TruckStatus;
+import com.mxkoo.transport_management.dto.road.*;
+import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.entity.Road;
 import com.mxkoo.transport_management.entity.Truck;
 import com.mxkoo.transport_management.mapper.RoadMapper;
-import com.mxkoo.transport_management.mapper.TruckMapper;
 import com.mxkoo.transport_management.repository.RoadRepository;
-import com.mxkoo.transport_management.constant.TruckStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +20,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -34,38 +31,38 @@ public class RoadService {
     private final RoadStatusService roadStatusService;
     private final RestTemplate restTemplate;
 
-    public List<RoadDTO> getAllTruckRoads(Long truckId) {
+    public List<GetRoadResponse> getAllTruckRoads(Long truckId) {
         return roadRepository.getRoadByTruckId(truckId)
                              .stream()
-                             .map(RoadMapper::mapToDTO)
+                             .map(RoadMapper::mapToGetRoadResponse)
                              .toList();
     }
 
-    public List<RoadDTO> getAllDriverRoads(Long driverId) {
+    public List<GetRoadResponse> getAllDriverRoads(Long driverId) {
         return roadRepository.getRoadByDriverId(driverId)
                              .stream()
-                             .map(RoadMapper::mapToDTO)
+                             .map(RoadMapper::mapToGetRoadResponse)
                              .toList();
     }
 
     @Transactional
-    public RoadDTO createRoad(RoadDTO roadDTO, int capacity) {
-        Truck truck = truckService.getAvailableTruck(capacity, roadDTO);
-        Driver driver = driverService.getAvailableDriverNotOnRoad(roadDTO);
+    public CreateRoadResponse createRoad(CreateRoadRequest createRoadRequest, Integer capacity) {
+        Truck truck = truckService.getAvailableTruck(capacity, createRoadRequest.arrivalDate(), createRoadRequest.departureDate());
+        Driver driver = driverService.getAvailableDriverNotOnRoad(createRoadRequest.arrivalDate(), createRoadRequest.departureDate());
 
         if (!truck.getTruckStatus()
                   .equals(TruckStatus.WAITING_FOR_ROAD) || !driver.getDriverStatus()
                                                                   .equals(DriverStatus.WAITING_FOR_ROAD)) {
             throw new IllegalArgumentException("Pojazd lub kierowca nie jest gotowy do drogi");
         }
-        validateDate(roadDTO.departureDate(), roadDTO.arrivalDate());
+        validateDate(createRoadRequest.departureDate(), createRoadRequest.arrivalDate());
         Road road = new Road();
-        road.setFrom(roadDTO.from());
-        road.setVia(roadDTO.via());
-        road.setTo(roadDTO.to());
-        road.setDepartureDate(roadDTO.departureDate());
-        road.setArrivalDate(roadDTO.arrivalDate());
-        Double distance = calculateDistance(roadDTO.from(), roadDTO.via(), roadDTO.to());
+        road.setFrom(createRoadRequest.from());
+        road.setVia(createRoadRequest.via());
+        road.setTo(createRoadRequest.to());
+        road.setDepartureDate(createRoadRequest.departureDate());
+        road.setArrivalDate(createRoadRequest.arrivalDate());
+        Double distance = calculateDistance(createRoadRequest.from(), createRoadRequest.via(), createRoadRequest.to());
         Double roundDistance = (double) (Math.round(distance * 100) / 100);
         Double price = roundDistance * 7;
         road.setDistance(roundDistance);
@@ -73,69 +70,55 @@ public class RoadService {
         road.setTruck(truck);
         road.setDriver(driver);
         roadStatusService.setStatusForRoad(road);
-        return RoadMapper.mapToDTO(roadRepository.save(road));
+        return RoadMapper.mapToCreateRoadResponse(roadRepository.save(road));
     }
 
     @Transactional
-    public RoadDTO updateRoad(Long id, RoadDTO toUpdate) {
-        checkIfExists(id);
-        Road road = RoadMapper.mapToEntity(getRoadById(id));
+    public UpdateRoadResponse updateRoad(Long id, UpdateRoadRequest updateRoadRequest) {
+        Road road = roadRepository.findById(id)
+                                  .orElseThrow();
         if (ChronoUnit.DAYS.between(LocalDate.now(), road.getDepartureDate()) < 7) {
             throw new IllegalArgumentException("Można edytować trasę do 7 dni przed wyjazdem");
         }
 
-        if (toUpdate.from() != null) {
-            road.setFrom(toUpdate.from());
+        if (updateRoadRequest.from() != null) {
+            road.setFrom(updateRoadRequest.from());
         }
-        if (toUpdate.via() != null) {
-            road.setVia(toUpdate.via());
+        if (updateRoadRequest.via() != null) {
+            road.setVia(updateRoadRequest.via());
         }
-        if (toUpdate.to() != null) {
-            road.setTo(toUpdate.to());
+        if (updateRoadRequest.to() != null) {
+            road.setTo(updateRoadRequest.to());
         }
-        if (toUpdate.departureDate() != null) {
-            road.setDepartureDate(toUpdate.departureDate());
+        if (updateRoadRequest.departureDate() != null) {
+            road.setDepartureDate(updateRoadRequest.departureDate());
         }
-        if (toUpdate.arrivalDate() != null) {
-            road.setArrivalDate(toUpdate.arrivalDate());
+        if (updateRoadRequest.arrivalDate() != null) {
+            road.setArrivalDate(updateRoadRequest.arrivalDate());
         }
-        if (toUpdate.truckDTO() != null) {
-            road.setTruck(TruckMapper.mapToEntityWithRoad(toUpdate.truckDTO()));
+        if (updateRoadRequest.roadStatus() != null) {
+            road.setRoadStatus(updateRoadRequest.roadStatus());
         }
-        if (toUpdate.driverDTO() != null) {
-            road.setDriver(DriverMapper.mapToEntityWithRoad(toUpdate.driverDTO()));
-        }
-        if (toUpdate.roadStatus() != null) {
-            road.setRoadStatus(toUpdate.roadStatus());
-        }
-        return RoadMapper.mapToDTO(roadRepository.save(road));
+        return RoadMapper.mapToUpdateRoadResponse(roadRepository.save(road));
     }
 
     @Transactional
-    public List<RoadDTO> getAllRoads() {
-        List<Road> roads = roadRepository.findAll();
-        return roads.stream()
-                    .map(RoadMapper::mapToDTO)
-                    .toList();
+    public List<GetRoadResponse> getAllRoads() {
+        return roadRepository.findAll()
+                             .stream()
+                             .map(RoadMapper::mapToGetRoadResponse)
+                             .toList();
     }
 
     @Transactional
     public void deleteAllRoads() {
-        var roads = roadRepository.findAll();
-        roadRepository.deleteAll(roads);
+        roadRepository.deleteAll();
     }
 
     @Transactional
-    public RoadDTO getRoadById(Long id) {
-        checkIfExists(id);
-        return RoadMapper.mapToDTO(roadRepository.findById(id)
-                                                 .orElseThrow());
-    }
-
-    private void checkIfExists(Long id) {
-        if (!roadRepository.existsById(id)) {
-            throw new NoSuchElementException("Road doesn't exist");
-        }
+    public GetRoadResponse getRoadById(Long id) {
+        return RoadMapper.mapToGetRoadResponse(roadRepository.findById(id)
+                                                             .orElseThrow());
     }
 
     @Transactional

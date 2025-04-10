@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class TruckServiceImplTest {
+class TruckServiceTest {
     private TruckRepository truckRepository;
     private TruckService truckService;
     private TruckStatusService truckStatusService;
@@ -24,7 +24,7 @@ class TruckServiceImplTest {
     void prepare(){
         truckRepository = mock(TruckRepository.class);
         truckStatusService = mock(TruckStatusService.class);
-        truckService = new TruckServiceImpl(truckRepository, truckStatusService);
+        truckService = new TruckService(truckRepository, truckStatusService);
     }
 
     @Test

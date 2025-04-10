@@ -20,31 +20,31 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LocationController {
 
-    private final LocationDriverService driverService;
-    private final LocationTruckService truckService;
-    private final LocationRoadService roadService;
+    private final LocationDriverService locationDriverService;
+    private final LocationTruckService locationTruckService;
+    private final LocationRoadService locationRoadService;
 
     @GetMapping("/drivers")
     @ResponseBody
     public List<LocationDriverDTO> getDrivers() {
-        return driverService.getDriverLocations();
+        return locationDriverService.getDriverLocations();
     }
 
     @GetMapping("/trucks")
     @ResponseBody
     public List<LocationTruckDTO> getTrucks() {
-        return truckService.getTruckLocations();
+        return locationTruckService.getTruckLocations();
     }
 
     @GetMapping("/roads")
     @ResponseBody
     public List<LocationRoadDTO> getRoads() {
-        return roadService.getRoadLocation();
+        return locationRoadService.getRoadLocation();
     }
 
     @GetMapping("/map")
     public String getMap(Model model) {
-        List<LocationRoadDTO> roads = roadService.getRoadLocation();
+        List<LocationRoadDTO> roads = locationRoadService.getRoadLocation();
         model.addAttribute("road", roads);
         return "map";
     }

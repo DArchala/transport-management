@@ -9,13 +9,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class DriverServiceImplTest {
+class DriverServiceTest {
 
     private DriverRepository driverRepository;
 
@@ -27,7 +30,7 @@ class DriverServiceImplTest {
     void prepare(){
         driverRepository = mock(DriverRepository.class);
         driverStatusService = mock(DriverStatusService.class);
-        driverService = new DriverServiceImpl(driverRepository, driverStatusService);
+        driverService = new DriverService(driverRepository, driverStatusService);
     }
 
     @Test

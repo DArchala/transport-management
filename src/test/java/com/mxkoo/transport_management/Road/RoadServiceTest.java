@@ -2,38 +2,27 @@ package com.mxkoo.transport_management.Road;
 
 import com.mxkoo.transport_management.Coordinates.Coordinates;
 import com.mxkoo.transport_management.Driver.Driver;
-import com.mxkoo.transport_management.Driver.DriverDTO;
-import com.mxkoo.transport_management.Driver.DriverMapper;
 import com.mxkoo.transport_management.Driver.DriverService;
 import com.mxkoo.transport_management.Driver.DriverStatus.DriverStatus;
 import com.mxkoo.transport_management.RoadStatus.RoadStatus;
 import com.mxkoo.transport_management.RoadStatus.RoadStatusService;
 import com.mxkoo.transport_management.Truck.Truck;
-import com.mxkoo.transport_management.Truck.TruckDTO;
-import com.mxkoo.transport_management.Truck.TruckMapper;
 import com.mxkoo.transport_management.Truck.TruckService;
 import com.mxkoo.transport_management.Truck.TruckStatus.TruckStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import org.springframework.core.ParameterizedTypeReference;
-
-import static javax.management.Query.eq;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class RoadServiceImplTest {
+class RoadServiceTest {
     private RoadRepository roadRepository;
     private RoadStatusService roadStatusService;
     private TruckService truckService;
@@ -48,7 +37,7 @@ class RoadServiceImplTest {
         truckService = mock(TruckService.class);
         driverService = mock(DriverService.class);
         restTemplate = mock(RestTemplate.class);
-        roadService = new RoadServiceImpl(roadRepository,truckService, driverService, roadStatusService, restTemplate);
+        roadService = new RoadService(roadRepository, truckService, driverService, roadStatusService, restTemplate);
     }
 
 

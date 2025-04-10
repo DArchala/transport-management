@@ -87,7 +87,7 @@ public class DriverService {
     @Transactional
     public SetDriverCoordinatesResponse setCoordinatesForDriver(Long driverId, SetDriverCoordinatesRequest coordinates) throws Exception {
         Driver driver = repository.findById(driverId)
-                                  .orElseThrow(() -> new Exception("Driver not found with ID: " + driverId));
+                                  .orElseThrow(() -> new NoSuchElementException("Driver not found with ID: " + driverId));
         driver.setCoordinates(new Coordinates(coordinates.x(), coordinates.y()));
         return DriverMapper.mapToSetDriverCoordinatesResponse(driver);
     }

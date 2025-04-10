@@ -8,24 +8,25 @@ import com.mxkoo.transport_management.entity.Driver;
 public class DriverMapper {
 
     public static SetDriverCoordinatesResponse mapToSetDriverCoordinatesResponse(Driver driver) {
-        return SetDriverCoordinatesResponse.builder()
-                                           .id(driver.getId())
-                                           .name(driver.getName())
-                                           .lastName(driver.getLastName())
-                                           .coordinates(driver.getCoordinates().toDto())
-                                           .email(driver.getEmail())
-                                           .contactNumber(driver.getContactNumber())
-                                           .driverStatus(driver.getDriverStatus())
-                                           .daysOffLeft(driver.getDaysOffLeft())
-                                           .build();
+        return new SetDriverCoordinatesResponse(driver.getId(),
+                                                driver.getName(),
+                                                driver.getLastName(),
+                                                driver.getCoordinates()
+                                                      .toDto(),
+                                                driver.getEmail(),
+                                                driver.getContactNumber(),
+                                                driver.getDriverStatus(),
+                                                driver.getDaysOffLeft());
     }
 
     public static UpdateDriverResponse mapToUpdateDriverResponse(Driver driver) {
+        er
         return UpdateDriverResponse.builder()
                                    .id(driver.getId())
                                    .name(driver.getName())
                                    .lastName(driver.getLastName())
-                                   .coordinates(driver.getCoordinates().toDto())
+                                   .coordinates(driver.getCoordinates()
+                                                      .toDto())
                                    .email(driver.getEmail())
                                    .contactNumber(driver.getContactNumber())
                                    .driverStatus(driver.getDriverStatus())
@@ -38,7 +39,8 @@ public class DriverMapper {
                                 .id(driver.getId())
                                 .name(driver.getName())
                                 .lastName(driver.getLastName())
-                                .coordinates(driver.getCoordinates().toDto())
+                                .coordinates(driver.getCoordinates()
+                                                   .toDto())
                                 .email(driver.getEmail())
                                 .contactNumber(driver.getContactNumber())
                                 .driverStatus(driver.getDriverStatus())

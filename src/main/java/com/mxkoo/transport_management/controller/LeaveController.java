@@ -1,6 +1,5 @@
 package com.mxkoo.transport_management.controller;
 
-import com.mxkoo.transport_management.constant.DriverRoutes;
 import com.mxkoo.transport_management.dto.LeaveDTO;
 import com.mxkoo.transport_management.service.LeaveService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping(DriverRoutes.ROOT)
+@RequestMapping("/drivers")
 @RequiredArgsConstructor
 public class LeaveController {
 

@@ -1,7 +1,6 @@
 package com.mxkoo.transport_management.controller;
 
 import com.mxkoo.transport_management.dto.RoadDTO;
-import com.mxkoo.transport_management.constant.RoadRoutes;
 import com.mxkoo.transport_management.service.RoadService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,42 +11,42 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(RoadRoutes.ROOT)
+@RequestMapping("/roads")
 public class RoadController {
 
     private final RoadService roadService;
 
-    @PostMapping(RoadRoutes.POST)
+    @PostMapping()
     public RoadDTO createRoad(@RequestBody @Valid RoadDTO roadDTO, @RequestParam int capacity) {
         return roadService.createRoad(roadDTO, capacity);
     }
 
-    @GetMapping(RoadRoutes.GET + "/{id}")
+    @GetMapping("/{id}")
     public RoadDTO getRoadById(@PathVariable Long id) {
         return roadService.getRoadById(id);
     }
 
-    @GetMapping(RoadRoutes.GET + "/truckroads" + "/{truckId}")
+    @GetMapping("/truck-roads/{truckId}")
     public List<RoadDTO> getAllTruckRoads(@PathVariable Long truckId) {
         return roadService.getAllTruckRoads(truckId);
     }
 
-    @GetMapping(RoadRoutes.GET + "/driverroads" + "/{driverId}")
+    @GetMapping("/driver-roads/{driverId}")
     public List<RoadDTO> getAllDriverRoads(@PathVariable Long driverId) {
         return roadService.getAllDriverRoads(driverId);
     }
 
-    @GetMapping(RoadRoutes.GET + "/all")
+    @GetMapping("/all")
     public List<RoadDTO> getAllRoads() {
         return roadService.getAllRoads();
     }
 
-    @PatchMapping(RoadRoutes.UPDATE + "/{id}")
+    @PatchMapping("/{id}")
     public RoadDTO updateRoad(@PathVariable Long id, @RequestBody RoadDTO toUpdate) {
         return roadService.updateRoad(id, toUpdate);
     }
 
-    @DeleteMapping(RoadRoutes.DELETE + "/all")
+    @DeleteMapping("/all")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteAllRoads() {
         roadService.deleteAllRoads();

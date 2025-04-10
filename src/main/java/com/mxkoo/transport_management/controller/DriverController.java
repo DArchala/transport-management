@@ -2,7 +2,6 @@ package com.mxkoo.transport_management.controller;
 
 import com.mxkoo.transport_management.dto.Coordinates;
 import com.mxkoo.transport_management.dto.DriverDTO;
-import com.mxkoo.transport_management.constant.DriverRoutes;
 import com.mxkoo.transport_management.service.DriverService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,40 +11,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(DriverRoutes.ROOT)
+@RequestMapping("/drivers")
 @RequiredArgsConstructor
 public class DriverController {
 
     private final DriverService driverService;
 
-    @PostMapping(DriverRoutes.POST)
+    @PostMapping("/add")
     public DriverDTO createDriver(@RequestBody @Validated DriverDTO driverDTO) {
         return driverService.createDriver(driverDTO);
     }
 
-    @GetMapping(DriverRoutes.GET + "/{id}")
+    @GetMapping("/{id}")
     public DriverDTO getDriverById(@PathVariable Long id) throws Exception {
         return driverService.getDriverById(id);
     }
 
-    @GetMapping(DriverRoutes.GET + "/all")
+    @GetMapping("/all")
     public List<DriverDTO> getAllDrivers() {
         return driverService.getAllDrivers();
     }
 
-    @DeleteMapping(DriverRoutes.DELETE + "/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteDriver(@PathVariable Long id) throws Exception {
         driverService.deleteById(id);
     }
 
-    @DeleteMapping(DriverRoutes.DELETE + "/all")
+    @DeleteMapping("/all")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void deleteAllDrivers() {
         driverService.deleteAllDrivers();
     }
 
-    @PatchMapping(DriverRoutes.UPDATE + "/{id}")
+    @PatchMapping("/{id}")
     public DriverDTO updateDriver(@PathVariable Long id, @RequestBody DriverDTO toUpdate) throws Exception {
         return driverService.updateDriver(id, toUpdate);
     }

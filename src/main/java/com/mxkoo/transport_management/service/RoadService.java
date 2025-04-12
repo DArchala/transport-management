@@ -2,14 +2,17 @@ package com.mxkoo.transport_management.service;
 
 import com.mxkoo.transport_management.constant.DriverStatus;
 import com.mxkoo.transport_management.constant.TruckStatus;
+import com.mxkoo.transport_management.dto.RouteDriving;
 import com.mxkoo.transport_management.dto.road.*;
 import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.entity.Road;
 import com.mxkoo.transport_management.entity.Truck;
+import com.mxkoo.transport_management.exception.ApplicationException;
 import com.mxkoo.transport_management.mapper.RoadMapper;
 import com.mxkoo.transport_management.repository.RoadRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class RoadService {
     private final DriverService driverService;
     private final RoadStatusService roadStatusService;
     private final RestTemplate restTemplate;
+    private final ProjectOsrmService projectOsrmService;
 
     public List<GetRoadResponse> getAllTruckRoads(Long truckId) {
         return roadRepository.getRoadByTruckId(truckId)
@@ -141,22 +146,13 @@ public class RoadService {
     }
 
     private double calculateSegmentDistance(String from, String to) {
-        String url = String.format(
-                "https://router.project-osrm.org/route/v1/driving/%s;%s?overview=false",
-                geocodeCity(from), geocodeCity(to)
-                                  );
-
-        ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-        if (response.getBody() != null) {
-            List<Map<String, Object>> routes = (List<Map<String, Object>>) response.getBody()
-                                                                                   .get("routes");
-            if (routes != null && !routes.isEmpty()) {
-                return ((Number) routes.get(0)
-                                       .get("distance")).doubleValue();
-            }
-        }
-
-        throw new IllegalStateException("Unable to calculate distance between " + from + " and " + to);
+        return Optional.ofNullable(projectOsrmService.getRoute(geocodeCity(from), geocodeCity(to))
+                                                     .routes())
+                       .map(List::getFirst)
+                       .stream()
+                       .findFirst()
+                       .map(RouteDriving.Route::distance)
+                       .orElseThrow(() -> ApplicationException.of("Unable to calculate distance between " + from + " and " + to, HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     private String geocodeCity(String city) {

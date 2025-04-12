@@ -29,6 +29,7 @@ class RoadServiceTest {
     private DriverService driverService;
     private RestTemplate restTemplate;
     private RoadService roadService;
+    private ProjectOsrmService projectOsrmService;
 
     @BeforeEach
     void prepare(){
@@ -37,7 +38,8 @@ class RoadServiceTest {
         truckService = mock(TruckService.class);
         driverService = mock(DriverService.class);
         restTemplate = mock(RestTemplate.class);
-        roadService = new RoadService(roadRepository, truckService, driverService, roadStatusService, restTemplate);
+        projectOsrmService = mock(ProjectOsrmService.class);
+        roadService = new RoadService(roadRepository, truckService, driverService, roadStatusService, restTemplate, projectOsrmService);
     }
 
 

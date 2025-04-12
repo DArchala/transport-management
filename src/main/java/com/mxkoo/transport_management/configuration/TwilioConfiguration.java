@@ -1,4 +1,4 @@
-package com.mxkoo.transport_management;
+package com.mxkoo.transport_management.configuration;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

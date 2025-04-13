@@ -2,10 +2,10 @@ package com.mxkoo.transport_management.service;
 
 import com.mxkoo.transport_management.constant.TruckStatus;
 import com.mxkoo.transport_management.dto.coordinates.CoordinatesDto;
-import com.mxkoo.transport_management.entity.Coordinates;
 import com.mxkoo.transport_management.dto.truck.CreateTruckRequest;
 import com.mxkoo.transport_management.dto.truck.UpdateTruckRequest;
 import com.mxkoo.transport_management.dto.truck.UpdateTruckResponse;
+import com.mxkoo.transport_management.entity.Coordinates;
 import com.mxkoo.transport_management.entity.Truck;
 import com.mxkoo.transport_management.repository.TruckRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +23,11 @@ import static org.mockito.Mockito.*;
 class TruckServiceTest {
     private TruckRepository truckRepository;
     private TruckService truckService;
-    private TruckStatusService truckStatusService;
 
     @BeforeEach
     void prepare() {
         truckRepository = mock(TruckRepository.class);
-        truckStatusService = mock(TruckStatusService.class);
-        truckService = new TruckService(truckRepository, truckStatusService);
+        truckService = new TruckService(truckRepository);
     }
 
     @Test
@@ -37,14 +35,13 @@ class TruckServiceTest {
         //given
         CreateTruckRequest createTruckRequest = new CreateTruckRequest(1L, "XD 1234A", 55, new CoordinatesDto(50, 50), LocalDate.of(2025, 12, 12), TruckStatus.WAITING_FOR_ROAD);
 
-        Truck created = new Truck();
-        created.setId(1L);
-        created.setLicensePlate("XD 1234A");
-        created.setCapacity(55);
-        created.setCoordinates(new Coordinates(50, 50));
-        created.setInspectionDate(LocalDate.of(2025, 12, 12));
-        created.setRoads(new ArrayList<>());
-        created.setTruckStatus(TruckStatus.WAITING_FOR_ROAD);
+        Truck created = new Truck(1L,
+                                  "XD 1234A",
+                                  55,
+                                  new Coordinates(50, 50),
+                                  LocalDate.of(2025, 12, 12),
+                                  new ArrayList<>(),
+                                  TruckStatus.WAITING_FOR_ROAD);
         //when
         when(truckRepository.save(any(Truck.class))).thenReturn(created);
 
@@ -91,10 +88,7 @@ class TruckServiceTest {
     @Test
     void getTruck_WhenIsOnTheWay_ShouldThrowException() {
         // given
-        Truck truck = new Truck();
-        truck.setCapacity(55);
-        truck.setTruckStatus(TruckStatus.ON_THE_WAY);
-        truck.setRoads(new ArrayList<>());
+        Truck truck = new Truck(1L, "licensePlate", 55, null, null, new ArrayList<>(), TruckStatus.ON_THE_WAY);
 
         when(truckRepository.findByCapacityAndTruckStatus(55, TruckStatus.WAITING_FOR_ROAD))
                 .thenReturn(Collections.emptyList());

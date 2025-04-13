@@ -75,13 +75,11 @@ public class LeaveService {
             }
         }
 
-        Leave leave = new Leave();
-        leave.setDriver(driver);
-        leave.setStart(createLeaveRequest.start());
-        leave.setEnd(createLeaveRequest.end());
+        var leave = Leave.create(driver, createLeaveRequest.start(), createLeaveRequest.end());
+
         leaveRepository.save(leave);
         scheduleDriverStatusUpdate(driverId, createLeaveRequest.start(), DriverStatus.ON_VACATION);
-        driver.setDaysOffLeft(driver.getDaysOffLeft() - leaveDays);
+        driver.subtractFromDaysOff(leaveDays);
         driverRepository.save(driver);
 
         scheduleDriverStatusUpdate(driverId,
@@ -113,14 +111,8 @@ public class LeaveService {
         }
         Driver driver = driverRepository.findById(updateLeaveRequest.driverId())
                                         .orElseThrow();
-        leave.setDriver(driver);
+        leave.update(driver, updateLeaveRequest.start(), updateLeaveRequest.end());
 
-        if (updateLeaveRequest.start() != null) {
-            leave.setStart(updateLeaveRequest.start());
-        }
-        if (updateLeaveRequest.end() != null) {
-            leave.setEnd(updateLeaveRequest.end());
-        }
         return LeaveMapper.mapToUpdateLeaveResponse(leaveRepository.save(leave));
     }
 
@@ -136,7 +128,8 @@ public class LeaveService {
         Driver driver = driverRepository.findById(leave.getDriver()
                                                        .getId())
                                         .orElseThrow();
-        driver.setDaysOffLeft(driver.getDaysOffLeft() + leaveDays + 1);
+        driver.addToDaysOffLeft(leaveDays);
+
         driverRepository.save(driver);
     }
 
@@ -144,7 +137,7 @@ public class LeaveService {
         Runnable task = () -> {
             Driver driver = driverRepository.findById(driverId)
                                             .orElseThrow(() -> new EntityNotFoundException("Nie znaleziono kierowcy"));
-            driver.setDriverStatus(status);
+            driver.applyResolvedStatus(status);
             driverRepository.save(driver);
         };
 

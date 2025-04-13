@@ -10,16 +10,13 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Table(name = "DRIVER")
 @Entity
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Driver {
@@ -50,7 +47,7 @@ public class Driver {
     @Enumerated(EnumType.STRING)
     private DriverStatus driverStatus;
 
-    private int daysOffLeft;
+    private Integer daysOffLeft;
 
     @OneToMany(mappedBy = "driver", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
@@ -112,5 +109,16 @@ public class Driver {
 
     public void applyResolvedStatus(DriverStatus status) {
         this.driverStatus = status;
+    }
+
+    public void subtractFromDaysOff(int leaveDays) {
+        if (leaveDays > daysOffLeft) {
+            daysOffLeft = 0;
+        }
+        daysOffLeft = daysOffLeft - leaveDays;
+    }
+
+    public void addToDaysOffLeft(int leaveDays) {
+        daysOffLeft = daysOffLeft + leaveDays + 1;
     }
 }

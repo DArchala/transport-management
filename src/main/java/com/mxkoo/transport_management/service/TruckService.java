@@ -4,6 +4,7 @@ import com.mxkoo.transport_management.constant.TruckStatus;
 import com.mxkoo.transport_management.entity.Coordinates;
 import com.mxkoo.transport_management.dto.truck.*;
 import com.mxkoo.transport_management.entity.Truck;
+import com.mxkoo.transport_management.exception.ApplicationException;
 import com.mxkoo.transport_management.mapper.TruckMapper;
 import com.mxkoo.transport_management.repository.TruckRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +20,12 @@ import java.util.NoSuchElementException;
 public class TruckService {
 
     private final TruckRepository truckRepository;
-    private final TruckStatusService truckStatusService;
 
     @Transactional
     public void createTruck(CreateTruckRequest createTruckRequest) {
-        Truck truck = new Truck();
-        truck.setLicensePlate(createTruckRequest.licensePlate());
-        truck.setCapacity(createTruckRequest.capacity());
-        truck.setInspectionDate(createTruckRequest.inspectionDate());
-        truckStatusService.setStatusForTruck(truck);
-        truckRepository.save(truck);
+        truckRepository.save(Truck.create(createTruckRequest.licensePlate(),
+                                          createTruckRequest.capacity(),
+                                          createTruckRequest.inspectionDate()));
     }
 
     public GetTruckResponse getTruckById(Long id) {
@@ -56,28 +53,20 @@ public class TruckService {
 
     @Transactional
     public UpdateTruckResponse updateTruck(Long id, UpdateTruckRequest updateTruckRequest) {
-        Truck truck = truckRepository.findById(id)
+        var truck = truckRepository.findById(id)
                                      .orElseThrow();
-        if (updateTruckRequest.licensePlate() != null) {
-            truck.setLicensePlate(updateTruckRequest.licensePlate());
-        }
-        if (updateTruckRequest.capacity() != null) {
-            truck.setCapacity(updateTruckRequest.capacity());
-        }
-        if (updateTruckRequest.inspectionDate() != null) {
-            truck.setInspectionDate(updateTruckRequest.inspectionDate());
-        }
-        if (updateTruckRequest.truckStatus() != null) {
-            truck.setTruckStatus(updateTruckRequest.truckStatus());
-        }
+        truck.update(updateTruckRequest.licensePlate(),
+                     updateTruckRequest.capacity(),
+                     updateTruckRequest.inspectionDate(),
+                     updateTruckRequest.truckStatus());
         return TruckMapper.mapToUpdateTruckResponse(truckRepository.save(truck));
     }
 
     @Transactional
     public SetTruckCoordinatesResponse setCoordinatesForTruck(Long truckId, SetTruckCoordinatesRequest setTruckCoordinatesRequest) {
-        Truck truck = truckRepository.findById(truckId)
-                                     .orElseThrow(() -> new NoSuchElementException("Truck not found with ID: " + truckId));
-        truck.setCoordinates(new Coordinates(setTruckCoordinatesRequest.x(), setTruckCoordinatesRequest.y()));
+        var truck = truckRepository.findById(truckId)
+                                     .orElseThrow(() -> ApplicationException.notFound("Truck with id: %s, not found".formatted(truckId)));
+        truck.applyNewCoordinates(new Coordinates(setTruckCoordinatesRequest.x(), setTruckCoordinatesRequest.y()));
         return TruckMapper.mapToSetTruckCoordinatesResponse(truck);
     }
 

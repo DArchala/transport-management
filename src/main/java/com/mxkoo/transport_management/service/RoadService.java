@@ -60,20 +60,22 @@ public class RoadService {
             throw new IllegalArgumentException("Pojazd lub kierowca nie jest gotowy do drogi");
         }
         validateDate(createRoadRequest.departureDate(), createRoadRequest.arrivalDate());
-        Road road = new Road();
-        road.setFrom(createRoadRequest.from());
-        road.setVia(createRoadRequest.via());
-        road.setTo(createRoadRequest.to());
-        road.setDepartureDate(createRoadRequest.departureDate());
-        road.setArrivalDate(createRoadRequest.arrivalDate());
+
         Double distance = calculateDistance(createRoadRequest.from(), createRoadRequest.via(), createRoadRequest.to());
         Double roundDistance = (double) (Math.round(distance * 100) / 100);
         Double price = roundDistance * 7;
-        road.setDistance(roundDistance);
-        road.setPrice(price);
-        road.setTruck(truck);
-        road.setDriver(driver);
-        roadStatusService.setStatusForRoad(road);
+
+        Road road = Road.create(createRoadRequest.from(),
+                                createRoadRequest.via(),
+                                createRoadRequest.to(),
+                                createRoadRequest.departureDate(),
+                                createRoadRequest.arrivalDate(),
+                                roundDistance,
+                                price,
+                                truck,
+                                driver,
+                                applicationTime.today());
+
         return RoadMapper.mapToCreateRoadResponse(roadRepository.save(road));
     }
 
@@ -85,24 +87,13 @@ public class RoadService {
             throw new IllegalArgumentException("Można edytować trasę do 7 dni przed wyjazdem");
         }
 
-        if (updateRoadRequest.from() != null) {
-            road.setFrom(updateRoadRequest.from());
-        }
-        if (updateRoadRequest.via() != null) {
-            road.setVia(updateRoadRequest.via());
-        }
-        if (updateRoadRequest.to() != null) {
-            road.setTo(updateRoadRequest.to());
-        }
-        if (updateRoadRequest.departureDate() != null) {
-            road.setDepartureDate(updateRoadRequest.departureDate());
-        }
-        if (updateRoadRequest.arrivalDate() != null) {
-            road.setArrivalDate(updateRoadRequest.arrivalDate());
-        }
-        if (updateRoadRequest.roadStatus() != null) {
-            road.setRoadStatus(updateRoadRequest.roadStatus());
-        }
+        road.update(updateRoadRequest.from(),
+                    updateRoadRequest.via(),
+                    updateRoadRequest.to(),
+                    updateRoadRequest.departureDate(),
+                    updateRoadRequest.arrivalDate(),
+                    updateRoadRequest.roadStatus());
+
         return RoadMapper.mapToUpdateRoadResponse(roadRepository.save(road));
     }
 

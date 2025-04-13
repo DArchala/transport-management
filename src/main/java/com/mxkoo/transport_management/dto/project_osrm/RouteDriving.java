@@ -1,4 +1,4 @@
-package com.mxkoo.transport_management.dto;
+package com.mxkoo.transport_management.dto.project_osrm;
 
 import java.util.List;
 

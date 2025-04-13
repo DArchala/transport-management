@@ -48,8 +48,6 @@ class TruckServiceTest {
         //when
         when(truckRepository.save(any(Truck.class))).thenReturn(created);
 
-        ;
-
         //then
         assertDoesNotThrow(() -> truckService.createTruck(createTruckRequest));
         verify(truckRepository, times(1)).save(any(Truck.class));

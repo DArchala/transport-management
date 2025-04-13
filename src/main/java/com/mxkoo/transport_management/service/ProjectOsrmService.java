@@ -1,6 +1,6 @@
 package com.mxkoo.transport_management.service;
 
-import com.mxkoo.transport_management.dto.RouteDriving;
+import com.mxkoo.transport_management.dto.project_osrm.RouteDriving;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;

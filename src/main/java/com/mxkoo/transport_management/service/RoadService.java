@@ -2,7 +2,7 @@ package com.mxkoo.transport_management.service;
 
 import com.mxkoo.transport_management.constant.DriverStatus;
 import com.mxkoo.transport_management.constant.TruckStatus;
-import com.mxkoo.transport_management.dto.RouteDriving;
+import com.mxkoo.transport_management.dto.project_osrm.RouteDriving;
 import com.mxkoo.transport_management.dto.road.*;
 import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.entity.Road;
@@ -13,16 +13,13 @@ import com.mxkoo.transport_management.repository.RoadRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -33,8 +30,8 @@ public class RoadService {
     private final TruckService truckService;
     private final DriverService driverService;
     private final RoadStatusService roadStatusService;
-    private final RestTemplate restTemplate;
     private final ProjectOsrmService projectOsrmService;
+    private final NominatimOpenStreetMapService nominatimOpenStreetMapService;
 
     public List<GetRoadResponse> getAllTruckRoads(Long truckId) {
         return roadRepository.getRoadByTruckId(truckId)
@@ -146,31 +143,16 @@ public class RoadService {
     }
 
     private double calculateSegmentDistance(String from, String to) {
-        return Optional.ofNullable(projectOsrmService.getRoute(geocodeCity(from), geocodeCity(to))
+        var fromCoordinates = nominatimOpenStreetMapService.findCoordinatesByCity(from);
+        var toCoordinates = nominatimOpenStreetMapService.findCoordinatesByCity(to);
+        return Optional.ofNullable(projectOsrmService.getRoute(fromCoordinates, toCoordinates)
                                                      .routes())
                        .map(List::getFirst)
                        .stream()
                        .findFirst()
                        .map(RouteDriving.Route::distance)
-                       .orElseThrow(() -> ApplicationException.of("Unable to calculate distance between " + from + " and " + to, HttpStatus.INTERNAL_SERVER_ERROR));
-    }
-
-    private String geocodeCity(String city) {
-        String url = String.format("https://nominatim.openstreetmap.org/search?format=json&q=%s", city);
-
-        ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
-        if (response.getBody() != null && !response.getBody()
-                                                   .isEmpty()) {
-            Map<String, Object> location = (Map<String, Object>) response.getBody()
-                                                                         .get(0);
-            double lat = Double.parseDouble(location.get("lat")
-                                                    .toString());
-            double lon = Double.parseDouble(location.get("lon")
-                                                    .toString());
-            return lon + "," + lat; // Format: longitude,latitude
-        }
-
-        throw new IllegalStateException("Unable to geocode city: " + city);
+                       .orElseThrow(() -> ApplicationException.of("Unable to calculate distance between %s and %s".formatted(from, to),
+                                                                  HttpStatus.INTERNAL_SERVER_ERROR));
     }
 
     private void validateDate(LocalDate departureDate, LocalDate arrivalDate) {

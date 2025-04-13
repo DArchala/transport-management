@@ -1,5 +1,6 @@
 package com.mxkoo.transport_management.service;
 
+import com.mxkoo.transport_management.component.ApplicationTime;
 import com.mxkoo.transport_management.constant.DriverStatus;
 import com.mxkoo.transport_management.dto.leave.CreateLeaveRequest;
 import com.mxkoo.transport_management.dto.leave.GetLeaveResponse;
@@ -28,15 +29,17 @@ public class LeaveService {
 
     private final DriverRepository driverRepository;
     private final LeaveRepository leaveRepository;
+    private final ApplicationTime applicationTime;
 
     @Transactional
     public void createLeave(Long driverId, CreateLeaveRequest createLeaveRequest) throws Exception {
+        var today = applicationTime.today();
         if (createLeaveRequest.start()
                               .isAfter(createLeaveRequest.end())
             && createLeaveRequest.start()
-                                 .isBefore(LocalDate.now())
+                                 .isBefore(today)
             && createLeaveRequest.end()
-                                 .isBefore(LocalDate.now())) {
+                                 .isBefore(today)) {
             throw new IllegalArgumentException();
         }
 
@@ -105,7 +108,7 @@ public class LeaveService {
     public UpdateLeaveResponse updateLeave(Long leaveId, UpdateLeaveRequest updateLeaveRequest) {
         Leave leave = leaveRepository.findById(leaveId)
                                      .orElseThrow();
-        if (ChronoUnit.DAYS.between(LocalDate.now(), leave.getStart()) < 7) {
+        if (ChronoUnit.DAYS.between(applicationTime.today(), leave.getStart()) < 7) {
             throw new IllegalArgumentException("Można edytować urlop do 7 dni przed wyjazdem");
         }
         Driver driver = driverRepository.findById(updateLeaveRequest.driverId())
@@ -125,7 +128,7 @@ public class LeaveService {
     public void cancelLeave(Long leaveId) throws Exception {
         Leave leave = leaveRepository.findById(leaveId)
                                      .orElseThrow();
-        if ((ChronoUnit.DAYS.between(LocalDate.now(), leave.getStart())) < 7) {
+        if ((ChronoUnit.DAYS.between(applicationTime.today(), leave.getStart())) < 7) {
             throw new Exception("Możesz odwołać urlop do 7 dni przed datą jego startu.");
         }
         int leaveDays = (int) ChronoUnit.DAYS.between(leave.getStart(), leave.getEnd());
@@ -146,7 +149,7 @@ public class LeaveService {
         };
 
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        long delay = ChronoUnit.DAYS.between(LocalDate.now(), updateDate) * 24 * 60 * 60;
+        long delay = ChronoUnit.DAYS.between(applicationTime.today(), updateDate) * 24 * 60 * 60;
         scheduler.schedule(task, delay, TimeUnit.SECONDS);
     }
 

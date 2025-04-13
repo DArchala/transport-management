@@ -1,17 +1,17 @@
 package com.mxkoo.transport_management.service;
 
+import com.mxkoo.transport_management.component.ApplicationTime;
 import com.mxkoo.transport_management.constant.DriverStatus;
 import com.mxkoo.transport_management.constant.RoadStatus;
 import com.mxkoo.transport_management.constant.TruckStatus;
-import com.mxkoo.transport_management.entity.Coordinates;
 import com.mxkoo.transport_management.dto.road.GetRoadResponse;
+import com.mxkoo.transport_management.entity.Coordinates;
 import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.entity.Road;
 import com.mxkoo.transport_management.entity.Truck;
 import com.mxkoo.transport_management.repository.RoadRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -27,9 +27,10 @@ class RoadServiceTest {
     private RoadStatusService roadStatusService;
     private TruckService truckService;
     private DriverService driverService;
-    private RestTemplate restTemplate;
     private RoadService roadService;
     private ProjectOsrmService projectOsrmService;
+    private NominatimOpenStreetMapService nominatimOpenStreetMapService;
+    private ApplicationTime applicationTime;
 
     @BeforeEach
     void prepare(){
@@ -37,9 +38,10 @@ class RoadServiceTest {
         roadStatusService = mock(RoadStatusService.class);
         truckService = mock(TruckService.class);
         driverService = mock(DriverService.class);
-        restTemplate = mock(RestTemplate.class);
         projectOsrmService = mock(ProjectOsrmService.class);
-        roadService = new RoadService(roadRepository, truckService, driverService, roadStatusService, restTemplate, projectOsrmService);
+        nominatimOpenStreetMapService = mock(NominatimOpenStreetMapService.class);
+        applicationTime = mock(ApplicationTime.class);
+        roadService = new RoadService(roadRepository, truckService, driverService, roadStatusService, projectOsrmService, nominatimOpenStreetMapService, applicationTime);
     }
 
 

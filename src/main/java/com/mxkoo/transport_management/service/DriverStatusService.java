@@ -1,20 +1,18 @@
 package com.mxkoo.transport_management.service;
 
+import com.mxkoo.transport_management.component.ApplicationTime;
 import com.mxkoo.transport_management.constant.DriverStatus;
-import com.mxkoo.transport_management.entity.Driver;
 import com.mxkoo.transport_management.repository.DriverRepository;
-import com.mxkoo.transport_management.entity.Leave;
 import com.mxkoo.transport_management.repository.LeaveRepository;
-import com.mxkoo.transport_management.entity.Road;
 import com.mxkoo.transport_management.repository.RoadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,44 +21,36 @@ public class DriverStatusService {
     private final DriverRepository driverRepository;
     private final RoadRepository roadRepository;
     private final LeaveRepository leaveRepository;
+    private final ApplicationTime applicationTime;
 
     @Transactional
     @Scheduled(cron = "0 1 0 * * ?")
     public void checkDriverStatuses() {
-        List<Driver> drivers = driverRepository.findAll();
-        for (Driver driver : drivers) {
-            setStatusForDriver(driver);
-            driverRepository.save(driver);
-        }
+        var drivers = driverRepository.findAll()
+                                      .stream()
+                                      .collect(Collectors.toMap(driver -> driver, driver -> resolveDriverStatus(driver.getId())))
+                                      .entrySet()
+                                      .stream()
+                                      .filter(entry -> entry.getValue()
+                                                            .isPresent())
+                                      .peek(entry -> entry.getKey()
+                                                          .applyResolvedStatus(entry.getValue()
+                                                                                    .get()))
+                                      .map(Map.Entry::getKey)
+                                      .toList();
+        driverRepository.saveAll(drivers);
     }
 
-    public void setStatusForDriver(Driver driver) {
-        Optional<Road> firstRoad = roadRepository.findFirstByDriverIdOrderByDepartureDateAsc(driver.getId());
-        Optional<Leave> firstLeave = leaveRepository.findFirstByDriverIdOrderByEndAsc(driver.getId());
+    public Optional<DriverStatus> resolveDriverStatus(Long driverId) {
+        var driverStatusFromRoad = roadRepository.findFirstByDriverIdOrderByDepartureDateAsc(driverId)
+                                                 .map(road -> road.isDriverOnTheWay(applicationTime.today()) ? DriverStatus.ON_THE_WAY : null);
 
-        LocalDate today = LocalDate.now();
-        boolean statusUpdated = false;
-
-        if (firstRoad.isPresent() && !statusUpdated) {
-            Road road = firstRoad.get();
-            if (!today.isBefore(road.getDepartureDate()) && !today.isAfter(road.getArrivalDate())) {
-                driver.setDriverStatus(DriverStatus.ON_THE_WAY);
-                statusUpdated = true;
-            }
+        if (driverStatusFromRoad.isPresent()) {
+            return driverStatusFromRoad;
         }
 
-        if (firstLeave.isPresent() && !statusUpdated) {
-            Leave leave = firstLeave.get();
-            if (today.equals(leave.getEnd())) {
-                driver.setDriverStatus(DriverStatus.WAITING_FOR_ROAD);
-                statusUpdated = true;
-            }
-        }
-
-        if (!statusUpdated) {
-            driver.setDriverStatus(DriverStatus.WAITING_FOR_ROAD);
-        }
+        return leaveRepository.findFirstByDriverIdOrderByEndAsc(driverId)
+                              .map(leave -> leave.endsWith(applicationTime.today()) ? DriverStatus.WAITING_FOR_ROAD : null);
     }
-
 
 }

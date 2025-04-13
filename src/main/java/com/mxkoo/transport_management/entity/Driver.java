@@ -109,4 +109,8 @@ public class Driver {
     public void applyNewCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
     }
+
+    public void applyResolvedStatus(DriverStatus status) {
+        this.driverStatus = status;
+    }
 }

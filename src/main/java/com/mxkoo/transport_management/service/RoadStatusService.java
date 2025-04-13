@@ -1,5 +1,6 @@
 package com.mxkoo.transport_management.service;
 
+import com.mxkoo.transport_management.component.ApplicationTime;
 import com.mxkoo.transport_management.constant.RoadStatus;
 import com.mxkoo.transport_management.entity.Road;
 import com.mxkoo.transport_management.repository.RoadRepository;
@@ -8,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -16,6 +16,7 @@ import java.util.List;
 public class RoadStatusService {
 
     private final RoadRepository roadRepository;
+    private final ApplicationTime applicationTime;
 
     @Transactional
     @Scheduled(cron = "0 1 0 * * ?")
@@ -27,7 +28,7 @@ public class RoadStatusService {
     }
 
     public void setStatusForRoad(Road road) {
-        LocalDate today = LocalDate.now();
+        var today = applicationTime.today();
 
         if (!today.isBefore(road.getDepartureDate()) && !today.isAfter(road.getArrivalDate())) {
             road.setRoadStatus(RoadStatus.IN_PROGRESS);

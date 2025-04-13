@@ -1,5 +1,6 @@
 package com.mxkoo.transport_management.service;
 
+import com.mxkoo.transport_management.component.ApplicationTime;
 import com.mxkoo.transport_management.constant.DriverStatus;
 import com.mxkoo.transport_management.constant.TruckStatus;
 import com.mxkoo.transport_management.dto.project_osrm.RouteDriving;
@@ -32,6 +33,7 @@ public class RoadService {
     private final RoadStatusService roadStatusService;
     private final ProjectOsrmService projectOsrmService;
     private final NominatimOpenStreetMapService nominatimOpenStreetMapService;
+    private final ApplicationTime applicationTime;
 
     public List<GetRoadResponse> getAllTruckRoads(Long truckId) {
         return roadRepository.getRoadByTruckId(truckId)
@@ -79,7 +81,7 @@ public class RoadService {
     public UpdateRoadResponse updateRoad(Long id, UpdateRoadRequest updateRoadRequest) {
         Road road = roadRepository.findById(id)
                                   .orElseThrow();
-        if (ChronoUnit.DAYS.between(LocalDate.now(), road.getDepartureDate()) < 7) {
+        if (ChronoUnit.DAYS.between(applicationTime.today(), road.getDepartureDate()) < 7) {
             throw new IllegalArgumentException("Można edytować trasę do 7 dni przed wyjazdem");
         }
 
@@ -156,13 +158,14 @@ public class RoadService {
     }
 
     private void validateDate(LocalDate departureDate, LocalDate arrivalDate) {
+        var today = applicationTime.today();
         if (arrivalDate.isBefore(departureDate)) {
             throw new DateTimeException("Data przyjazdu musi być po dacie wyjazdu");
         }
         if (departureDate.isAfter(arrivalDate)) {
             throw new DateTimeException("Data wyjazdu musi być przed datą przyjazdu");
         }
-        if (arrivalDate.isBefore(LocalDate.now()) || departureDate.isBefore(LocalDate.now())) {
+        if (arrivalDate.isBefore(today) || departureDate.isBefore(today)) {
             throw new DateTimeException("Data wyjazdu lub przyjazdu nie może być przed datą dzisiejszą");
         }
     }

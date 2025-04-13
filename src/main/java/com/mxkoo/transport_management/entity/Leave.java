@@ -28,6 +28,8 @@ public class Leave {
     @Column(name = "\"end\"")
     private LocalDate end;
 
-
+    public boolean endsWith(LocalDate today) {
+        return today.equals(end);
+    }
 
 }

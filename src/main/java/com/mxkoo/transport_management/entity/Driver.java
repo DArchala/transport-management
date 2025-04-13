@@ -106,7 +106,7 @@ public class Driver {
         }
     }
 
-    public void applyNewCoordinates(Coordinates coordinates) {
+    public void updateCoordinates(Coordinates coordinates) {
         this.coordinates = coordinates;
     }
 

@@ -48,8 +48,7 @@ public class DriverService {
 
     @Transactional
     public void deleteAllDrivers() {
-        var drivers = repository.findAll();
-        repository.deleteAll(drivers);
+        repository.deleteAll();
     }
 
     public UpdateDriverResponse updateDriver(Long id, UpdateDriverRequest request) {
@@ -63,11 +62,11 @@ public class DriverService {
         return mapper.toUpdateDriverResponse(driver);
     }
 
-    public SetDriverCoordinatesResponse setCoordinatesForDriver(Long driverId, SetDriverCoordinatesRequest coordinates) {
+    public UpdateDriverCoordinatesResponse updateDriverCoordinates(Long driverId, UpdateDriverCoordinatesRequest coordinates) {
         var driver = repository.findById(driverId)
                                .orElseThrow(() -> ApplicationException.notFound("Driver with id %s does not exists"));
-        driver.applyNewCoordinates(new Coordinates(coordinates.x(), coordinates.y()));
-        return mapper.toSetDriverCoordinatesResponse(repository.save(driver));
+        driver.updateCoordinates(new Coordinates(coordinates.x(), coordinates.y()));
+        return mapper.toUpdateDriverCoordinatesResponse(repository.save(driver));
     }
 
     @Transactional
